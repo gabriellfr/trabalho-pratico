@@ -1,0 +1,54 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+// Definição da estrutura Ponto
+typedef struct {
+    float x;
+    float y;
+} Ponto;
+
+// Função para calcular a área de um triângulo
+float AreaTriangulo(Ponto A, Ponto B, Ponto C) {
+    return fabs((A.x*(B.y - C.y) + B.x*(C.y - A.y) + C.x*(A.y - B.y)) / 2.0);
+}
+
+// Função para ler os vértices do arquivo e calcular a área do polígono
+float CalcularArea(FILE *arquivo) {
+    int numVertices;
+    fscanf(arquivo, "%d", &numVertices);
+
+    Ponto *vertices = (Ponto*)malloc((numVertices+1) * sizeof(Ponto)); // Adiciona um espaço extra para o último vértice que conecta ao primeiro
+
+    // Lendo os vértices do arquivo
+    for (int i = 0; i < numVertices; i++) {
+        fscanf(arquivo, "%f %f", &vertices[i].x, &vertices[i].y);
+    }
+    // Conectando o último vértice ao primeiro
+    vertices[numVertices] = vertices[0];
+
+    // Calculando a área do polígono dividindo-o em triângulos
+    float areaTotal = 0;
+    for (int i = 0; i < numVertices; i++) {
+        areaTotal += AreaTriangulo(vertices[i], vertices[i + 1], vertices[i + 2]);
+    }
+
+    free(vertices);
+    return areaTotal;
+}
+
+int main() {
+    FILE *arquivo;
+    arquivo = fopen("vertices.txt", "r");
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo.\n");
+        return 1;
+    }
+
+    float area = CalcularArea(arquivo);
+    fclose(arquivo);
+
+    printf("A area do poligono e: %.2f\n", area);
+
+    return 0;
+}
